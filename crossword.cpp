@@ -1,126 +1,215 @@
-#include <bits/stdc++.h>
+// #include <bits/stdc++.h>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
-vector<string> wordArray(string words){
-	vector<string> wordarray;
 
-    string::size_type start = 0;
-    string::size_type end = 0;
+vector<string> split_string(string input_string) {
+    string::iterator new_end = unique(input_string.begin(), input_string.end(), [] (const char &x, const char &y) {
+        return x == y and x == ' ';
+    });
 
-    while ((end = words.find(';', start)) != string::npos) {
-    	string temp = words.substr(start, end - start);
-        wordarray.push_back(temp);
+    input_string.erase(new_end, input_string.end());
 
-        start = end + 1;
+    while (input_string[input_string.length() - 1] == ' ') {
+        input_string.pop_back();
     }
 
-    wordarray.push_back(words.substr(start));
+    vector<string> splits;
+    char delimiter = ';';
+
+    size_t i = 0;
+    size_t pos = input_string.find(delimiter);
+
+    while (pos != string::npos) {
+        splits.push_back(input_string.substr(i, pos - i));
+
+        i = pos + 1;
+        pos = input_string.find(delimiter, i);
+    }
+
+    splits.push_back(input_string.substr(i, min(pos, input_string.length()) - i + 1));
+
+    return splits;
+}
+
+string validplacement(int current_row, int current_col, std::vector<string> &crossword, string word){
+    int counter1=0,counter2=0;
+    // cout<<"code got here: row: "<<current_row<<" col: "<<current_col<<endl;
+    if(crossword[current_row][current_col]=='+' || crossword[current_row][current_col]=='X'){
+        return "false";
+    }
+    else{
+        if(crossword[current_row+1][current_col]=='-'){
+            while(crossword[current_row][current_col] !='+' && crossword[current_row][current_col]!='X'){
+                counter1++;
+                current_row++;
+            }
+        }
+        if(crossword[current_row][current_col+1]=='-'){
+            while(crossword[current_row][current_col]!='+' && crossword[current_row][current_col]!='X'){
+                counter2++;
+                current_col++;
+            }
+        }
+
+        if(counter1==word.length()){
+            return "row";
+        }
+        if(counter2==word.length()){
+            return "col";
+        }
+    }
+
+    return "false";
+}
+
+bool addword(int current_row, int current_col, std::vector<string> &crossword, string word, string direction){
     
-    return wordarray;
+        if(direction=="row"){
+            for (int j = 0; j < word.length(); ++j)
+            {
+                crossword[current_row][current_col]=word[j];
+                current_row++;
+            }
+            return true;
+        }
+        else if (direction=="col"){
+            for (int j = 0; j < word.length(); ++j)
+            {
+                crossword[current_row][current_col]=word[j];
+                current_col++;
+            }
+            return true;
+        }
+
+    return false;
 }
 
-    vector<string> crossword(10);
-int counter = 0,countered=0,counting=0,i=0,j=0;
+void removeword(std::vector<string> &words,string word){
+    auto itr = find(words.begin(),words.end(),word);
+    if(itr != words.end()) words.erase(itr);
 
-// Complete the crosswordPuzzle function below.
-
-//void recursepuzzle(string words){
-////	row=0,col=1;
-//	vector<string>newwordarray = wordArray(words);
-////	cout<<newwordarray[0].length()<<"\n";
-//	int p=0,counting=0,counter=0;
-//	for (int i = 0; i < 9; i++) {
-//		for (int j = 0; j < 9; j++) {
-//			for(int x=0;x<newwordarray.size();x++){
-//				counting=0,counter=0;
-//					if((crossword[i][j]=='-' || crossword[i][j] == newwordarray[x][0]) && crossword[i+1][j]=='-'){
-////						cout<<"vertical"<<"\n";
-//						for(int k = i;crossword[k][j] =='-';k++ )		//counts the '-' in the entire column of the puzzle
-//							{ counting++;}
-//							cout<<"counting: "<<counting<<"\n";
-//						if(newwordarray[x].length()== counting){//checks in the dictionary the word that matches the length of 'counting'
-////								cout<<"vertical:  "<<newwordarray[x]<<"\n";
-//							for(int k = i,y=0;k<i+counting;k++ ){ 
-//									crossword[k][j] = newwordarray[x][y++];
-////									cout<<newwordarray[x][y]<<" "; 
-//								}
-////								break;
-//						}
-////						counting=0;
-//					}
-//			
-//					else if((crossword[i][j]=='-' || crossword[i][j] == newwordarray[x][0]) && crossword[i][j+1]=='-'){	
-////						cout<<"horizontal"<<"\n";
-//						for(int k = j;crossword[i][k] =='-';k++ )
-//							{ counter++; }
-//							cout<<"row: "<<i<<"counter: "<<counter<<"\n";	
-//						if(newwordarray[x].length() == counter){	//checks in the dictionary the word that matches the length of 'counter'
-////								cout<<"horizontal:  "<<newwordarray[x]<<"\n";
-//							for(int k = j,y=0;k<j+counter;k++ ){ 
-//									crossword[i][k] = newwordarray[x][y++]; 
-//									cout<<newwordarray[x][y]<<" ";
-//								}
-////								break;
-//						}
-////						j=j+counter;
-////						counter=0;
-//					}
-//			}		
-//		}
-//	}
-//}
-void recursepuzzle(int row,int col,string words){
-	vector<string>newwordarray = wordArray(words);
-//	if(row<10 &&col<10){
-		for(int x=0;x<newwordarray.size();x++){
-				 if((crossword[row][col]=='-' || crossword[i][j] == newwordarray[x][0]) && crossword[i+1][j]=='-'){
-					if(crossword[row][col] == '-'){
-						counter++;
-						recursepuzzle(row+1,col,words);
-						cout<<"vertical: "<<counter<<"\n";
-					}
-					else{
-						row = row-counter;
-						
-					}
-				}
-				else if((crossword[row][col]=='-' || crossword[i][j] == newwordarray[x][0]) || crossword[i][j+1]=='-'){
-					if(crossword[row][col] == '-')	{
-						counting++;
-						recursepuzzle(row,col+1,words);
-						cout<<"horizontal: "<<counting<<"\n";
-					}
-					else{
-						col = col-counting;
-					}	
-				}
-				
-		}						
-//	}
+    return;
 }
+
+bool solvepuzzle(int row, int col, std::vector<string> &crossword, std::vector<string> &words){
+    if(col==10){
+        row=row+1;
+        col=0;
+    }
+    if(row==10){
+        return true;
+    }
+    else{
+        for (int i = 0; i < words.size(); ++i)
+        {
+            string direction = validplacement(row,col,crossword,words[i]);
+            if( direction=="row"){
+                // cout<<"adding downwards "<<endl;
+                addword(row,col,crossword,words[i], "row");
+                removeword(words,words[i]);
+
+            }
+            else if(direction=="col"){
+                // cout<<"adding rigtward "<<endl;
+                addword(row,col,crossword,words[i], "col");
+                removeword(words,words[i]);
+            }
+
+        }
+
+        // cout<<"row: "<<row<<" col: "<<col<<endl;
+        solvepuzzle(row,col+1,crossword,words);
+    }
+    return false;
+}
+
+
 int main()
 {
-    ofstream fout(getenv("OUTPUT_PATH"));
+    // ofstream fout(getenv("OUTPUT_PATH"));
 
-    for (int i = 0; i < 10; i++) {
-        string crossword_item;
-        getline(cin, crossword_item);
+    vector<string> crossword(10);
 
-        crossword[i] = crossword_item;
-    }
+    [&](){
+        for (int i = 0; i < 10; i++){
+            string crossword_item;
+            getline(cin, crossword_item);
+
+            crossword[i] = crossword_item;
+        }
+    };
 
     string words;
     getline(cin, words);
-	recursepuzzle(0,0,words);
 
-   for (int i = 0; i < 10; i++) {
-       cout<<crossword[i]<<"\n";
-    }
+    // vector<string> result = crosswordPuzzle(crossword, words);
+    auto answers = [&,words](){
 
-    fout << "\n";
+            std::vector<string> finalwords;
+            finalwords= split_string(words);
+            
+            if(crossword[0][0]=='+' || crossword[0][1]=='+' || crossword[1][0]=='+' || crossword[1][1]=='+'){
+                cout<<"+ here"<<endl;
+                std::vector<string> crosswordpuzz(12,"++++++++++++");
+                int m,n=0;
+                for(size_t i=1;i<crosswordpuzz.size()-1;i++){
+                    for(size_t j=1;j<crosswordpuzz[i].length()-1;j++){
+                        if(crossword[m][n]=='-'){
+                            crosswordpuzz[i][j]='-';
+                        }
+                        n++;
+                    }
+                    m++;
+                    n=0;
+                }
+                solvepuzzle(1,1,crosswordpuzz,finalwords);
+                return crosswordpuzz;
+            }
+            else{
+                // cout<<"X here"<<endl;
+                std::vector<string> crosswordpuzz(12,"XXXXXXXXXXXX");
+                int x,y=0;
+                for(size_t i=1;i<crosswordpuzz.size()-1;i++){
+                    for(size_t j=1;j<crosswordpuzz[i].length()-1;j++){
+                        // cout<<crossword[x][y]<<" ";
+                        if(crossword[x][y]=='-'){
+                            // cout<<"code ran"<<endl;
+                            crosswordpuzz[i][j]='-';
+                        }
+                        y++;
+                    }
+                    x++;
+                    y=0;
+                }
+                cout<<"board transferred "<<endl;
+                solvepuzzle(1,1,crosswordpuzz,finalwords);
+                return crosswordpuzz;
+            }
 
-    fout.close();
+            return finalwords;
+    };
+
+    // result();
+    vector<string> result =answers();
+
+    [=](){
+        for (int i = 1; i < result.size()-1; i++) {
+            cout << result[i].substr(1,10);
+
+            if (i != result.size() - 2) {
+                cout << "\n";
+            }
+        }
+
+    };
+
+    cout << "\n";
+
+    // fout.close();
 
     return 0;
 }
-
